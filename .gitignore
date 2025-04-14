@@ -1,3 +1,6 @@
 node_modules
 build
 package-lock.json
+
+src/dist
+Database_API/__pycache__

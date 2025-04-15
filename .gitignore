@@ -4,3 +4,5 @@ package-lock.json
 
 src/dist
 Database_API/__pycache__
+
+.env

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.5.15;
 
 contract Voting {
     address public admin;
@@ -20,7 +20,7 @@ contract Voting {
     event VotingEnded();
     event Voted(address indexed voter, uint indexed candidateId);
 
-    constructor() {
+    constructor() public {
         admin = msg.sender;
         votingOpen = false;
     }
@@ -60,7 +60,7 @@ contract Voting {
         emit Voted(msg.sender, _candidateId);
     }
 
-    function getCandidate(uint _candidateId) public view returns (string memory name, uint voteCount) {
+    function getCandidate(uint _candidateId) public view returns (string memory, uint) {
         Candidate memory candidate = candidates[_candidateId];
         return (candidate.name, candidate.voteCount);
     }

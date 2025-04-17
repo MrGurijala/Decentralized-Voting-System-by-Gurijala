@@ -48,6 +48,24 @@ app.post("/vote", async (req, res) => {
   }
 });
 
+// 3. Add candidate
+app.post("/add-candidate", async (req, res) => {
+  const { name, from } = req.body;
+
+  try {
+    const tx = await votingContract.methods.addCandidate(name).send({
+      from,
+      gas: 200000,
+    });
+
+    res.json({ message: "Candidate added", tx: tx.transactionHash });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to add candidate", details: err.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log("Backend API running on http://localhost:3000");
 });

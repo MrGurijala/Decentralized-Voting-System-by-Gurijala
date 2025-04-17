@@ -6,3 +6,5 @@ src/dist
 Database_API/__pycache__
 
 .env
+
+backend/node_modules

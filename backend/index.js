@@ -66,6 +66,24 @@ app.post("/add-candidate", async (req, res) => {
   }
 });
 
+//4. Start voting
+app.post("/start-voting", async (req, res) => {
+  const { from } = req.body;
+
+  try {
+    const tx = await votingContract.methods.startVoting().send({
+      from,
+      gas: 100000,
+    });
+
+    res.json({ message: "Voting started", tx: tx.transactionHash });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Failed to start voting", details: err.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log("Backend API running on http://localhost:3000");
 });

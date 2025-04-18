@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Voting DApp</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light p-4">
+    <div class="container">
+      <h1 class="mb-4">🗳️ Decentralized Voting DApp</h1>
+
+      <!-- Wallet Connection -->
+      <button class="btn btn-success mb-3" onclick="connectWallet()">
+        🔌 Connect Wallet
+      </button>
+      <p id="wallet" class="fw-bold"></p>
+
+      <!-- Voting Status -->
+      <p id="status" class="fw-semibold text-primary"></p>
+      <p id="votedStatus" class="text-muted"></p>
+
+      <!-- Candidate List -->
+      <h3>Candidates</h3>
+      <div id="candidateList" class="mb-4"></div>
+
+      <!-- Admin Panel -->
+      <h3>Admin Panel</h3>
+      <div class="mb-3">
+        <input
+          id="candidateName"
+          class="form-control mb-2"
+          placeholder="New candidate name"
+        />
+        <button class="btn btn-secondary me-2" onclick="addCandidate()">
+          Add Candidate
+        </button>
+        <button class="btn btn-danger" onclick="startVoting()">
+          Start Voting
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <p class="text-muted mt-5">CN6035 Hybrid DApp Project</p>
+    </div>
+
+    <!-- Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="main.js"></script>
+
+    <!-- Auto-load candidates -->
+    <script src="main.js"></script>
+
+    <script>
+      window.onload = () => {
+        loadCandidates();
+        if (window.ethereum?.selectedAddress) {
+          currentAccount = window.ethereum.selectedAddress;
+          updateStatus();
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -1,9 +1,12 @@
 require("dotenv").config();
 const express = require("express");
 const Web3 = require("web3");
+const cors = require("cors");
+
 const contractData = require("../build/contracts/Voting.json");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.RPC_URL));
@@ -82,6 +85,14 @@ app.post("/start-voting", async (req, res) => {
       .status(500)
       .json({ error: "Failed to start voting", details: err.message });
   }
+});
+
+app.get("/status/:address", async (req, res) => {
+  const votingOpen = await votingContract.methods.votingOpen().call();
+  const hasVoted = await votingContract.methods
+    .voters(req.params.address)
+    .call();
+  res.json({ votingOpen, hasVoted });
 });
 
 app.listen(3000, () => {

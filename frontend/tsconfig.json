@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "es6",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "lib": ["dom", "es6"],
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["./main.ts"]
+}

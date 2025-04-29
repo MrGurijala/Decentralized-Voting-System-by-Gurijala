@@ -27,22 +27,32 @@
       <div id="candidateList" class="mb-4"></div>
 
       <!-- Admin Panel -->
-      <h3>Admin Panel</h3>
-      <div class="mb-3">
-        <input
-          id="candidateName"
-          class="form-control mb-2"
-          placeholder="New candidate name"
-        />
-        <button class="btn btn-secondary me-2" onclick="addCandidate()">
-          Add Candidate
-        </button>
-        <button class="btn btn-success me-2" onclick="startVoting()">
-          Start Voting
-        </button>
-        <button class="btn btn-danger" onclick="stopVoting()">
-          Stop Voting
-        </button>
+      <div id="adminPanel" style="display: none">
+        <h3>Admin Panel</h3>
+        <div class="mb-3">
+          <input
+            id="candidateName"
+            class="form-control mb-2"
+            placeholder="New candidate name"
+          />
+          <button class="btn btn-secondary me-2" onclick="addCandidate()">
+            Add Candidate
+          </button>
+          <button
+            id="startVotingButton"
+            class="btn btn-success me-2"
+            onclick="startVoting()"
+          >
+            Start Voting
+          </button>
+          <button
+            id="stopVotingButton"
+            class="btn btn-danger"
+            onclick="stopVoting()"
+          >
+            Stop Voting
+          </button>
+        </div>
       </div>
 
       <!-- Footer -->
@@ -57,11 +67,36 @@
     <script src="main.js"></script>
 
     <script>
-      window.onload = () => {
-        loadCandidates();
-        if (window.ethereum?.selectedAddress) {
-          currentAccount = window.ethereum.selectedAddress;
-          updateStatus();
+      window.onload = async () => {
+        await loadCandidates();
+
+        if (window.ethereum) {
+          if (window.ethereum.selectedAddress) {
+            currentAccount = window.ethereum.selectedAddress;
+            document.getElementById("wallet").innerText =
+              "Connected: " + currentAccount;
+
+            await fetchAdmin(); // ✅ Fetch admin again
+            checkIfAdmin(); // ✅ Update admin status
+
+            updateStatus();
+          }
+
+          window.ethereum.on("accountsChanged", async function (accounts) {
+            if (accounts.length === 0) {
+              console.log("Please connect to MetaMask.");
+            } else {
+              currentAccount = accounts[0];
+              document.getElementById("wallet").innerText =
+                "Connected: " + currentAccount;
+
+              await fetchAdmin();
+              checkIfAdmin();
+
+              updateStatus();
+              loadCandidates();
+            }
+          });
         }
       };
     </script>

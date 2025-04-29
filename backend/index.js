@@ -16,6 +16,16 @@ const votingContract = new web3.eth.Contract(
   process.env.CONTRACT_ADDRESS
 );
 
+app.get("/admin", async (req, res) => {
+  try {
+    const admin = await votingContract.methods.admin().call();
+    res.json({ admin });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch admin address" });
+  }
+});
+
 // 1. Get all candidates
 app.get("/candidates", async (req, res) => {
   try {
@@ -98,7 +108,7 @@ app.get("/status/:address", async (req, res) => {
 app.post("/stop-voting", async (req, res) => {
   const { from } = req.body;
   try {
-    const receipt = await contract.methods.endVoting().send({ from });
+    const receipt = await votingContract.methods.endVoting().send({ from });
     res.json({ tx: receipt.transactionHash });
   } catch (error) {
     console.error(error);

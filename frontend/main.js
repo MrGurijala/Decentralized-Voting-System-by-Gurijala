@@ -1,21 +1,24 @@
 let currentAccount = null;
+let adminAccount = null;
 
 // Connect to MetaMask wallet
 async function connectWallet() {
-  console.log("connectWallet() triggered");
-
   if (window.ethereum) {
     try {
-      console.log("inside the window connectWallet() triggered");
-
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
       currentAccount = accounts[0];
       document.getElementById("wallet").innerText =
         "Connected: " + currentAccount;
+
+      await fetchAdmin(); // Fetch admin from backend
+      checkIfAdmin(); // Check if current account is admin
+
       updateStatus();
+      loadCandidates();
     } catch (err) {
+      console.error(err);
       alert("Wallet connection failed: " + err.message);
     }
   } else {
@@ -23,33 +26,76 @@ async function connectWallet() {
   }
 }
 
+async function fetchAdmin() {
+  try {
+    const response = await axios.get("http://localhost:3000/admin");
+    adminAccount = response.data.admin.toLowerCase();
+    console.log("adminAccount in fetch: ", adminAccount);
+  } catch (err) {
+    console.error("Failed to fetch admin address:", err);
+  }
+}
+
+function checkIfAdmin() {
+  const adminPanel = document.getElementById("adminPanel");
+  console.log("adminAccount in check: ", adminAccount);
+  console.log("currentAccount in check: ", currentAccount);
+
+  if (currentAccount && adminAccount) {
+    if (currentAccount.toLowerCase() === adminAccount) {
+      adminPanel.style.display = "block"; // Show admin panel
+    } else {
+      adminPanel.style.display = "none"; // Hide admin panel
+    }
+  }
+}
+
 // Load candidates from backend
 async function loadCandidates() {
   try {
     const response = await axios.get("http://localhost:3000/candidates");
+    const statusResponse = await axios.get(
+      `http://localhost:3000/status/${currentAccount}`
+    );
+
     const list = document.getElementById("candidateList");
     list.innerHTML = "";
 
+    const votingOpen = statusResponse.data.votingOpen;
+
     response.data.candidates.forEach((candidate) => {
       const card = document.createElement("div");
-      card.className = "card p-3 mb-2";
+      card.className = "card text-center m-2 p-3";
 
       const name = document.createElement("h5");
-      name.innerText = `${candidate.name} (${candidate.votes} vote${
-        candidate.votes === "1" ? "" : "s"
-      })`;
-      name.className = "mb-2";
+      name.innerText = candidate.name;
+      name.className = "card-title";
+
+      const voteInfo = document.createElement("p");
+      voteInfo.className = "card-text";
+
+      if (votingOpen) {
+        voteInfo.innerText = "Votes will be shown after voting ends.";
+      } else {
+        voteInfo.innerText = `Votes: ${candidate.votes}`;
+      }
 
       const button = document.createElement("button");
       button.className = "btn btn-outline-primary";
       button.innerText = `Vote for ${candidate.name}`;
       button.onclick = () => vote(candidate.id);
+      button.disabled = !votingOpen;
 
       card.appendChild(name);
-      card.appendChild(button);
+      card.appendChild(voteInfo);
+      if (votingOpen) {
+        card.appendChild(button);
+      }
+
       list.appendChild(card);
     });
   } catch (err) {
+    console.error("Failed to load candidates:", err);
     alert("Failed to load candidates: " + err.message);
   }
 }
@@ -67,11 +113,15 @@ async function vote(candidateId) {
       voterAddress: currentAccount,
     });
 
-    alert("Vote successful! Tx: " + res.data.tx);
-    updateStatus(); // refresh voting status
+    alert("Vote successful!");
+
+    // ✅ Refresh after voting
+    await updateStatus();
+    await loadCandidates();
   } catch (err) {
     const message = err.response?.data?.details || err.message;
     alert("Vote failed: " + message);
+    console.error("Vote error:", err);
   }
 }
 

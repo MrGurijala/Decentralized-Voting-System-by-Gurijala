@@ -95,6 +95,19 @@ app.get("/status/:address", async (req, res) => {
   res.json({ votingOpen, hasVoted });
 });
 
+app.post("/stop-voting", async (req, res) => {
+  const { from } = req.body;
+  try {
+    const receipt = await contract.methods.endVoting().send({ from });
+    res.json({ tx: receipt.transactionHash });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "Failed to stop voting", details: error.message });
+  }
+});
+
 app.listen(3000, () => {
   console.log("Backend API running on http://localhost:3000");
 });

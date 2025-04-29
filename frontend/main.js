@@ -139,3 +139,18 @@ async function updateStatus() {
       "Unable to fetch voting status.";
   }
 }
+
+async function stopVoting() {
+  if (!currentAccount) return alert("Connect wallet first.");
+  try {
+    const res = await axios.post("http://localhost:3000/stop-voting", {
+      from: currentAccount,
+    });
+    alert("Voting stopped!");
+    updateStatus(); // Update UI to reflect new status
+    loadCandidates(); // Refresh candidate list with vote counts now visible
+  } catch (err) {
+    const msg = err.response?.data?.details || err.message;
+    alert("Failed to stop voting: " + msg);
+  }
+}

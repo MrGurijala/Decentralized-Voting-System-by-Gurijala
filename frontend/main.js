@@ -15,8 +15,8 @@ async function connectWallet() {
       await fetchAdmin(); // Fetch admin from backend
       checkIfAdmin(); // Check if current account is admin
 
-      updateStatus();
-      loadCandidates();
+      await updateStatus();
+      await loadCandidates();
     } catch (err) {
       console.error(err);
       alert("Wallet connection failed: " + err.message);
@@ -114,8 +114,6 @@ async function vote(candidateId) {
     });
 
     alert("Vote successful!");
-
-    // ✅ Refresh after voting
     await updateStatus();
     await loadCandidates();
   } catch (err) {
@@ -137,7 +135,7 @@ async function addCandidate() {
       from: currentAccount,
     });
     alert("Candidate added!");
-    loadCandidates();
+    await loadCandidates();
   } catch (err) {
     const msg = err.response?.data?.details || err.message;
     alert("Failed to add candidate: " + msg);
@@ -148,26 +146,39 @@ async function addCandidate() {
 async function startVoting() {
   if (!currentAccount) return alert("Connect wallet first.");
   try {
-    console.log("Start voting from:", currentAccount);
     const res = await axios.post("http://localhost:3000/start-voting", {
       from: currentAccount,
     });
     alert("Voting started!");
-    updateStatus();
+    await updateStatus();
+    await loadCandidates();
   } catch (err) {
     const msg = err.response?.data?.details || err.message;
     alert("Failed to start voting: " + msg);
   }
 }
 
-async function updateStatus() {
-  if (!currentAccount) {
-    console.log("No account connected");
-    return;
+// Stop voting (admin only)
+async function stopVoting() {
+  if (!currentAccount) return alert("Connect wallet first.");
+  try {
+    const res = await axios.post("http://localhost:3000/stop-voting", {
+      from: currentAccount,
+    });
+    alert("Voting stopped!");
+    await updateStatus();
+    await loadCandidates();
+  } catch (err) {
+    const msg = err.response?.data?.details || err.message;
+    alert("Failed to stop voting: " + msg);
   }
+}
+
+// Update status info
+async function updateStatus() {
+  if (!currentAccount) return;
 
   try {
-    console.log("Fetching status for", currentAccount);
     const res = await axios.get(
       `http://localhost:3000/status/${currentAccount}`
     );
@@ -181,8 +192,6 @@ async function updateStatus() {
 
     document.getElementById("status").innerText = votingStatus;
     document.getElementById("votedStatus").innerText = votedStatus;
-
-    console.log("Status updated successfully");
   } catch (err) {
     console.error("Error fetching voting status:", err);
     document.getElementById("status").innerText =
@@ -190,17 +199,9 @@ async function updateStatus() {
   }
 }
 
-async function stopVoting() {
-  if (!currentAccount) return alert("Connect wallet first.");
-  try {
-    const res = await axios.post("http://localhost:3000/stop-voting", {
-      from: currentAccount,
-    });
-    alert("Voting stopped!");
-    updateStatus(); // Update UI to reflect new status
-    loadCandidates(); // Refresh candidate list with vote counts now visible
-  } catch (err) {
-    const msg = err.response?.data?.details || err.message;
-    alert("Failed to stop voting: " + msg);
-  }
-}
+// Expose key functions to global scope
+window.connectWallet = connectWallet;
+window.vote = vote;
+window.addCandidate = addCandidate;
+window.startVoting = startVoting;
+window.stopVoting = stopVoting;
